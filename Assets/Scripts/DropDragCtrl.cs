@@ -6,6 +6,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
+using UnityEngine.EventSystems;
+
 public class DropDragCtrl : MonoBehaviour
 {
     [SerializeField] private Image _imgFoodDrag;
@@ -124,6 +126,18 @@ public class DropDragCtrl : MonoBehaviour
             }
             _hasDrag = false;
             StartCoroutine(TimeForClick());
+        }
+        
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            Debug.Log("Press K");
+            GameManager.Instance.LoadLevel();
+        }
+
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            Debug.Log("Press L");
+            GameManager.Instance.RemoveAllFood();
         }
     }
     private void OnClearCacheSlot()

@@ -17,6 +17,13 @@ public class TrayItems : MonoBehaviour
             _foodList[i].gameObject.SetActive(false);
         }
     }
+    public void HideFoodInTray()
+    {
+        for(int i = 0; i < _foodList.Count; i++)
+        {
+            _foodList[i].gameObject.SetActive(false);
+        }
+    }
     public void OnSetFood(List<Sprite> items)
     {
         if(items.Count <= _foodList.Count)

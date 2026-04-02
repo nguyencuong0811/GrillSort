@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using Unity.VisualScripting;
+using System.Linq;
 
 public class GrillStation : MonoBehaviour
 {
@@ -76,7 +77,6 @@ public class GrillStation : MonoBehaviour
                 _stackTrays.Push(item);
             }
         }
-        Debug.Log("So thuc an chua set: "+listFood.Count);
     }
     private FoodSlots RandomSlot()
     {
@@ -180,7 +180,7 @@ public class GrillStation : MonoBehaviour
     public bool CanMerge()
     {
         string name = _totalSlots[0].GetSpriteFood.name;
-        for (int i = 0;i < _totalSlots.Count; i++)
+        for (int i = 0;i < 3; i++)
         {
             if(_totalSlots[i].GetSpriteFood.name != name)
                 return false;
@@ -237,6 +237,7 @@ public class GrillStation : MonoBehaviour
         {
             if(!tray.gameObject.activeInHierarchy) 
                 continue;
+            
             foreach(var foodImg in tray.FoodList)
             {
                 if(foodImg.gameObject.activeInHierarchy && foodImg.sprite != null)
@@ -245,5 +246,37 @@ public class GrillStation : MonoBehaviour
         }
 
         return food;
+    }
+    public void HideAllFood()
+    {
+        foreach(var slot in _totalSlots)
+            slot.OnHideFood();
+        foreach(var tray in _totalTrays)
+            tray.HideFoodInTray();
+
+        _imgGrill.sprite = _grill;
+        _imgFoodTarget.SetActive(false);
+        foreach(var slot in _totalSlots)
+            slot.gameObject.SetActive(true);
+        
+        foreach(var tray in _totalTrays)
+            tray.gameObject.SetActive(true);
+    }
+    public bool CheckMerge()
+    {
+        if(CanMerge() == true) return true;
+
+        foreach(var tray in _totalTrays)
+        {
+            if(!tray.gameObject.activeInHierarchy) continue;
+            if(tray.FoodList.Count < 3) continue;
+
+            string name = tray.FoodList[0].sprite.name;
+            
+            if(tray.FoodList.All(f => f.sprite.name == name))
+                return true;
+        }
+ 
+        return false;
     }
 }

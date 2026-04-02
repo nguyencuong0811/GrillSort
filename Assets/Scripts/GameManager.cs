@@ -25,6 +25,8 @@ public class GameManager : MonoBehaviour
 
     private List<Sprite> _totalSpriteFood; //danh sach tat ca sprite thuc an 
     private List<int> _randLidGrill = new List<int>();
+
+    private int testInitCount = 0;
     
     void Awake()
     {
@@ -46,6 +48,7 @@ public class GameManager : MonoBehaviour
     {
         LoadLevel();
     }
+    
     public void LoadLevel()
     {
         int levelIndex = SaveManager.GetCurrentLevel();
@@ -58,6 +61,7 @@ public class GameManager : MonoBehaviour
     }
     private void InitLevel(LevelData levelData)
     {
+
         _allFood = levelData.AllFood;
         _totalFoods = levelData.TotalFood;
         _totalGrill = levelData.TotalGrill;
@@ -65,12 +69,42 @@ public class GameManager : MonoBehaviour
 
         _avgTray = (Random.Range(levelData.MinAvgTray, levelData.MaxAvgTray));
 
+
         // random bep bi an
         this.RandGrillHide();
 
-        OnInitLevel();
+        CheckAndInit();
+        //OnInitLevel();
+        foreach(var p in _listGrills)
+        {
+            if(p.CheckMerge() == true) Debug.Log("True");
+            else Debug.Log("False");
+        }
 
         this.SetActiveLidGrill();
+    }
+    private void CheckAndInit()
+    {
+        bool needReset;
+        do
+        {
+            needReset = false;
+            testInitCount++;
+            Debug.Log("Tao lai: "+ testInitCount +" lan");
+            RemoveAllFood();
+            OnInitLevel();
+            foreach(var grill in _listGrills)
+            {
+                if(grill.CheckMerge() == true)
+                {
+                    needReset = true;
+                    break;
+                }
+                
+            }
+        }while(needReset);
+
+        testInitCount = 0;
     }
     private void RandGrillHide()
     {
@@ -104,7 +138,6 @@ public class GameManager : MonoBehaviour
                 useFood.Add(takeFood[n]);
             }
         }
-        Debug.Log("Tong so thuc an: "+ useFood.Count);
         //random, trao vi tri cua cac item
         for(int i =0; i<useFood.Count; i++)
         {
@@ -293,6 +326,14 @@ public class GameManager : MonoBehaviour
 
         }
         return listFoodCanSetTarget;
+    }
+
+    public void RemoveAllFood()
+    {
+        foreach(var grill in _listGrills)
+        {
+            grill.HideAllFood();
+        }
     }
 
     public void BackToHome() => LoadingScene.Instance.BackToHome();
