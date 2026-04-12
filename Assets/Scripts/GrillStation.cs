@@ -14,6 +14,9 @@ public class GrillStation : MonoBehaviour
     [SerializeField] private Transform _trayContainer;
     [SerializeField] private Transform _slotContainer;
 
+    
+
+
     private Stack<TrayItems> _stackTrays = new Stack<TrayItems>();
     public List<FoodSlots> TotalSlot => _totalSlots;
 
@@ -23,6 +26,7 @@ public class GrillStation : MonoBehaviour
 
     private List<bool> _trayHasFood = new List<bool>();
     private Image _imgGrill;
+    public bool LidGrill => _imgGrill.sprite == _grill ? false : true;
     
     void Awake()
     {
@@ -34,7 +38,7 @@ public class GrillStation : MonoBehaviour
     public void OnInitGrill(int totalTray, List<Sprite> listFood)
     {
         //xu ly gia tri cho bep 
-    
+        _stackTrays.Clear();
         List<Sprite> list = listFood;
         int foodCount = Random.Range(1, _totalSlots.Count + 1);
         List<Sprite> listSlot = Utils.TakeAndRemoveRandom<Sprite>(list, foodCount);
@@ -112,7 +116,8 @@ public class GrillStation : MonoBehaviour
     {
         if(this.GetSlotNull() == null)
         {
-            if (this.CanMerge())
+
+            if (CanMerge())
             {
                 Sprite mergedFood = _totalSlots[0].GetSpriteFood;
                 Debug.Log("Complete Grill");
@@ -121,7 +126,7 @@ public class GrillStation : MonoBehaviour
                 GameManager.Instance?.OnMinusFood();
 
                 //kiem tra mo lid
-                GameManager.Instance.TryUnlockLidGrill(mergedFood);
+                GameManager.Instance?.TryUnlockLidGrill(mergedFood);
 
                 this.OnPerpareTray(false);
             }
@@ -138,10 +143,12 @@ public class GrillStation : MonoBehaviour
     }
     public void OnCheckPrepareTray()
     {
+        RebuildStackTrays();
         if(this.HasGrillEmpty())
         {
             this.OnPerpareTray(true);
         }
+        CheckTray();
     }
     private void OnPerpareTray(bool isNow)
     {
@@ -162,7 +169,8 @@ public class GrillStation : MonoBehaviour
                         FoodSlots slot = GetSlotNull();
                         if (slot == null) break;
 
-                        slot.OnPerPareItem(img);
+                        slot.OnPrepareItem(img);
+
                         img.gameObject.SetActive(false);
                         yield return new WaitForSeconds(0.1f);
                     }
@@ -180,7 +188,7 @@ public class GrillStation : MonoBehaviour
     public bool CanMerge()
     {
         string name = _totalSlots[0].GetSpriteFood.name;
-        for (int i = 0;i < 3; i++)
+        for (int i = 0;i < _totalSlots.Count; i++)
         {
             if(_totalSlots[i].GetSpriteFood.name != name)
                 return false;
@@ -249,6 +257,7 @@ public class GrillStation : MonoBehaviour
     }
     public void HideAllFood()
     {
+        _stackTrays.Clear();
         foreach(var slot in _totalSlots)
             slot.OnHideFood();
         foreach(var tray in _totalTrays)
@@ -261,6 +270,8 @@ public class GrillStation : MonoBehaviour
         
         foreach(var tray in _totalTrays)
             tray.gameObject.SetActive(true);
+
+        
     }
     public bool CheckMerge()
     {
@@ -278,5 +289,48 @@ public class GrillStation : MonoBehaviour
         }
  
         return false;
+    }
+    public void CheckTray()
+    {
+        foreach(var tray in _totalTrays)
+        {
+            if (tray.gameObject.activeInHierarchy && tray.CheckTray() == false)
+            {
+                tray.gameObject.SetActive(false);
+                CanvasGroup group = tray.GetComponent<CanvasGroup>();
+                group.DOFade(0, 0.5f).OnComplete(() =>
+                {
+                    
+                    group.alpha = 1f;
+                });
+            }
+        }
+    }
+
+    public TrayItems GetFirstTray()
+    {
+        for(int i = _totalTrays.Count - 1; i >= 0; i--)
+        {
+            if (_totalTrays[i].gameObject.activeInHierarchy)
+                return _totalTrays[i];
+        }
+        return null;
+    }
+    public void RebuildStackTrays()
+    {
+        _stackTrays.Clear();
+    
+        for (int i = 0; i < _totalTrays.Count; i++)
+        {
+            if (_totalTrays[i].gameObject.activeInHierarchy && _totalTrays[i].CheckTray())
+            {
+                _stackTrays.Push(_totalTrays[i]);
+            }
+        }
+    }
+    public void OnCheckTrayOnly()
+    {
+        RebuildStackTrays();
+        CheckTray();
     }
 }

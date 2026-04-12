@@ -61,7 +61,7 @@ public class DropDragCtrl : MonoBehaviour
             FoodSlots slot = Utils.GetRayCastUI<FoodSlots>(Input.mousePosition);
             if(slot != null)
             {
-                if (!slot.HasFood)// vi tri item chua co food
+                if (!slot.HasFood && slot.CanReceiveFood)// vi tri item chua co food
                 {
                     if(_cacheFood == null || _cacheFood.GetInstanceID() != slot.GetInstanceID())
                     {
@@ -77,7 +77,10 @@ public class DropDragCtrl : MonoBehaviour
 
                     if(slotAvalable != null)
                     {
-                        _cacheFood?.OnHideFood();
+                        if(_cacheFood != null && _cacheFood.gameObject != null && _cacheFood.CanReceiveFood)
+                        {
+                            _cacheFood.OnHideFood();
+                        }
                         // _cacheFood = slotAvalable;
                         // _cacheFood.OnFadeFood();
                         // _cacheFood.OnSetFood(_currentFood.GetSpriteFood);
@@ -94,7 +97,11 @@ public class DropDragCtrl : MonoBehaviour
             {
                 if(_cacheFood != null)
                 {
-                    _cacheFood.OnHideFood();
+                    if (_cacheFood.CanReceiveFood)
+                    {
+                        _cacheFood.OnHideFood();
+                    }
+                    
                     _cacheFood = null;
                 }
             }
@@ -110,7 +117,9 @@ public class DropDragCtrl : MonoBehaviour
                     _cacheFood.OnSetFood(_currentFood.GetSpriteFood);
                     _cacheFood.OnActiveFood(true);
                     _cacheFood.OnCheckMerge();
-                    _currentFood.OnCheckPerpareTray();
+
+                    _currentFood.OnCheckPrepareTray();
+
                     _cacheFood = null;
                     _currentFood = null;
                     

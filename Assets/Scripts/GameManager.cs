@@ -2,9 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.UI;
+using DG.Tweening;
 
 public class GameManager : MonoBehaviour
 {
@@ -20,6 +21,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform _gridGrill; //container chua cac bep
     [SerializeField] private int _totalLidGrill; // tong so bep bi an
 
+    [SerializeField] private GameTimer _gameTimer;
+
     private List<GrillStation> _listGrills; //danh sach cac bep
     private float _avgTray; //gia tri trung binh thuc an tren 1 dia
 
@@ -27,9 +30,13 @@ public class GameManager : MonoBehaviour
     private List<int> _randLidGrill = new List<int>();
 
     private int testInitCount = 0;
+
+    [SerializeField] private List<Image> _magnetLists = new();
+    [SerializeField] private Transform _magnetFx;
     
     void Awake()
     {
+        _gameTimer = GetComponent<GameTimer>();
         _listGrills = Utils.GetListInChild<GrillStation>(_gridGrill);
         Sprite[] sprites = Resources.LoadAll<Sprite>("items");
         _totalSpriteFood = sprites.ToList();
@@ -57,7 +64,10 @@ public class GameManager : MonoBehaviour
         
         _currentLevel = levelDatabase.Levels[levelIndex];
         _leveltxt.text = $"Level: {_currentLevel.Level+1}";
+
         InitLevel(_currentLevel);
+
+        _gameTimer.StartTimer(_currentLevel.TimeLimit);
     }
     private void InitLevel(LevelData levelData)
     {
@@ -75,11 +85,6 @@ public class GameManager : MonoBehaviour
 
         CheckAndInit();
         //OnInitLevel();
-        foreach(var p in _listGrills)
-        {
-            if(p.CheckMerge() == true) Debug.Log("True");
-            else Debug.Log("False");
-        }
 
         this.SetActiveLidGrill();
     }
@@ -90,7 +95,7 @@ public class GameManager : MonoBehaviour
         {
             needReset = false;
             testInitCount++;
-            Debug.Log("Tao lai: "+ testInitCount +" lan");
+            //Debug.Log("Tao lai: "+ testInitCount +" lan");
             RemoveAllFood();
             OnInitLevel();
             foreach(var grill in _listGrills)
@@ -266,14 +271,14 @@ public class GameManager : MonoBehaviour
     
     public void TryUnlockLidGrill(Sprite completedFood)
     {
-        foreach(int grillIndex in _randLidGrill)
+        for(int i = 0; i < _randLidGrill.Count; i++)
         {
-            GrillStation grill = _listGrills[grillIndex];
+            GrillStation grill = _listGrills[_randLidGrill[i]];
             if (grill.HasLidWithFood(completedFood))
             {
                 grill.ShowGrill();
-                _randLidGrill.Remove(grillIndex);
-                break; 
+                _randLidGrill.RemoveAt(i);
+                break;
             }
         }
     }
@@ -295,7 +300,7 @@ public class GameManager : MonoBehaviour
 
         foreach(var grill in _listGrills)
         {
-            if(!grill.gameObject.activeInHierarchy) 
+            if(!grill.gameObject.activeInHierarchy ) 
                 continue;
             // duyet tren bep
             foreach(var slot in grill.TotalSlot)
@@ -336,5 +341,168 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private bool _isMagnetRunning = false;
+
+    public void OnMagnet()
+    {
+        if(_isMagnetRunning) return;
+
+        Dictionary<string, List<Image>> foods = new Dictionary<string, List<Image>>();
+        foreach(var grill in _listGrills)
+        {
+            if (grill.gameObject.activeInHierarchy && grill.LidGrill == false)
+            {
+                for(int i = 0; i< grill.TotalSlot.Count; i++)
+                {
+                    FoodSlots slot = grill.TotalSlot[i];
+
+                    if (slot.HasFood)
+                    {
+                        string name = slot.GetSpriteFood.name;
+
+                        if(!foods.ContainsKey(name))
+                            foods.Add(name, new List<Image>());
+                        
+                        foods[name].Add(slot.ImgFood);                    }
+                }
+
+                TrayItems  tray = grill.GetFirstTray();
+
+                if(tray != null)
+                {
+                    for(int i = 0; i < tray.FoodList.Count; i++)
+                    {
+                        Image img = tray.FoodList[i];
+                        if (img.gameObject.activeInHierarchy)
+                        {
+                            string name = img.sprite.name;
+                            if(!foods.ContainsKey(name))
+                                foods.Add(name, new List<Image>());
+
+                            foods[name].Add(img);
+                        }
+
+                    }
+                }
+            }
+        }
+
+        StartCoroutine(IECollect());
+
+        IEnumerator IECollect()
+        {
+            _isMagnetRunning = true;
+
+            
+            foreach(var kvp in foods)
+            {
+                if(kvp.Value.Count >= 3)
+                {
+                    _magnetFx.DOScale(Vector3.one, 0.4f);
+                    List<Image> food = kvp.Value;
+                    
+                    FoodSlots foodSlots;
+                    Sprite compeletedSprite = kvp.Value[0].sprite;
+
+                    for(int i = 0; i < 3; i++)
+                    {
+                
+                        foodSlots = kvp.Value[i].gameObject.GetComponentInParent<FoodSlots>();
+
+                        Image imgDummy = _magnetLists[i];
+                        Image imgFood = kvp.Value[i];
+
+                        imgDummy.sprite = imgFood.sprite;
+                        imgDummy.SetNativeSize();
+                        imgDummy.transform.position = imgFood.transform.position;
+                        imgDummy.gameObject.SetActive(true);
+                        if(foodSlots != null)
+                            foodSlots.OnHideFood();
+                        else
+                            imgFood.gameObject.SetActive(false);
+                        //imgFood.gameObject.SetActive(false);
+                        imgDummy.color = new Color(1f, 1f, 1f, 1f);
+
+                        Vector3 mid = (imgDummy.transform.position + _magnetFx.position) / 2f;
+                        mid += new Vector3(Random.Range(-2, 2), Random.Range(-2, 2), 0);
+                        Vector3[] path = new Vector3[] {imgDummy.transform.position, mid, _magnetFx.position};
+
+                        Sequence seq = DOTween.Sequence();
+                        seq.Join(imgDummy.transform.DOPath(path, 1.5f, PathType.CatmullRom))
+                            .Join(imgDummy.DOColor(new Color(1f, 1f, 1f, 0.1f), 1.5f))
+                            .SetEase(Ease.InQuad)
+                            .OnComplete(() =>
+                            {
+                                imgDummy.gameObject.SetActive(false);
+                                imgDummy.transform.localScale = Vector3.one;
+
+                                imgFood.SendMessageUpwards("OnCheckPrepareTray");
+                                
+                            });
+                        
+                        yield return new WaitForSeconds(0.1f);
+                    }
+
+                    yield return new WaitForSeconds(1f);
+                    _magnetFx.DOScale(Vector3.zero, 0.5f).SetEase(Ease.InBack);
+
+                    TryUnlockLidGrill(compeletedSprite);
+                    OnMinusFood();
+                    break;
+                }
+                
+            }
+            yield return new WaitForSeconds(1f);
+            _isMagnetRunning = false;
+
+        }
+        
+    }
+
+    public void OnSwap()
+    {
+        List<Image> foods = new();
+
+        foreach(var grill in _listGrills)
+        {
+            if (grill.gameObject.activeInHierarchy)
+            {
+                for(int i = 0; i< grill.TotalSlot.Count; i++)
+                {
+                    FoodSlots slot = grill.TotalSlot[i];
+
+                    if (slot.HasFood)
+                    {
+                        foods.Add(slot.ImgFood);
+                    }
+                }
+            }
+
+            
+        }
+
+        Sequence seq = DOTween.Sequence();
+
+        foreach(var item in foods)
+        {
+            seq.Join(item.transform.DOScale(Vector3.zero, 0.5f).SetEase(Ease.InBack));
+        }
+        seq.AppendCallback(() =>
+        {
+           for(int i = foods.Count - 1; i > 0; i--)
+            {
+                int n = Random.Range(0, foods.Count);
+                Sprite tmp = foods[i].sprite;
+                foods[i].sprite = foods[n].sprite;
+                foods[n].sprite = tmp;
+            } 
+        });
+        foreach(var item in foods)
+        {
+            seq.Join(item.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack));
+        }
+    }
+
     public void BackToHome() => LoadingScene.Instance.BackToHome();
+
 }

@@ -24,6 +24,7 @@ public class TrayItems : MonoBehaviour
             _foodList[i].gameObject.SetActive(false);
         }
     }
+
     public void OnSetFood(List<Sprite> items)
     {
         if(items.Count <= _foodList.Count)
@@ -45,5 +46,16 @@ public class TrayItems : MonoBehaviour
             goto rerand;
         }
         return _foodList[n];
+    }
+
+    public bool CheckTray()
+    {
+        for(int i = 0; i < _foodList.Count; i++)
+        {
+            if(_foodList[i].gameObject.activeInHierarchy)
+            return true; 
+        }
+
+        return false;
     }
 }

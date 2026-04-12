@@ -19,3 +19,4 @@ MonoBehaviour:
   _totalLidGrill: 2
   _minAvgTray: 1.5
   _maxAvgTray: 2
+  _timeLimit: 300

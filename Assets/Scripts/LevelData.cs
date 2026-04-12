@@ -18,6 +18,8 @@ public class LevelData : ScriptableObject
     [SerializeField] private float _minAvgTray;
     [SerializeField] private float _maxAvgTray;
 
+    [SerializeField] private float _timeLimit;
+
 
     public int Level => _levelIndex;
     public int AllFood => _allFood;
@@ -26,4 +28,5 @@ public class LevelData : ScriptableObject
     public int TotalGrill => _totalGrill;
     public float MinAvgTray => _minAvgTray;
     public float MaxAvgTray => _maxAvgTray;
+    public float TimeLimit => _timeLimit;
 }
