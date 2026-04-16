@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _levelIndex: 2
   _allFood: 20
-  _totalFoods: 6
+  _totalFoods: 10
   _totalGrill: 9
   _totalLidGrill: 2
   _minAvgTray: 1.5

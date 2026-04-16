@@ -58,6 +58,7 @@ public class GameManager : MonoBehaviour
     
     public void LoadLevel()
     {
+        PopupManager.Instance.HideAll();
         int levelIndex = SaveManager.GetCurrentLevel();
         if(levelIndex >= levelDatabase.Levels.Count)
             levelIndex = 0;
@@ -341,11 +342,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private bool _isMagnetRunning = false;
+    private bool _isBoosterRuning = false;
 
     public void OnMagnet()
     {
-        if(_isMagnetRunning) return;
+        if(_isBoosterRuning) return;
 
         Dictionary<string, List<Image>> foods = new Dictionary<string, List<Image>>();
         foreach(var grill in _listGrills)
@@ -391,7 +392,7 @@ public class GameManager : MonoBehaviour
 
         IEnumerator IECollect()
         {
-            _isMagnetRunning = true;
+            _isBoosterRuning = true;
 
             
             foreach(var kvp in foods)
@@ -452,8 +453,8 @@ public class GameManager : MonoBehaviour
                 }
                 
             }
-            yield return new WaitForSeconds(1f);
-            _isMagnetRunning = false;
+            yield return new WaitForSeconds(0.8f);
+            _isBoosterRuning = false;
 
         }
         
@@ -461,6 +462,10 @@ public class GameManager : MonoBehaviour
 
     public void OnSwap()
     {
+        if(_isBoosterRuning) return;
+
+        _isBoosterRuning = true;
+
         List<Image> foods = new();
 
         foreach(var grill in _listGrills)
@@ -499,7 +504,10 @@ public class GameManager : MonoBehaviour
         });
         foreach(var item in foods)
         {
-            seq.Join(item.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack));
+            seq.Join(item.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack).OnComplete(() =>
+            {
+                _isBoosterRuning = false;
+            }));
         }
     }
 

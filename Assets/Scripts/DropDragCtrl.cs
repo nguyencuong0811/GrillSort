@@ -1,7 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
@@ -30,6 +27,10 @@ public class DropDragCtrl : MonoBehaviour
         }
         if (Input.GetMouseButtonDown(0) && _canClick) 
         {
+            if (PopupManager.Instance.HasPopupOpen)
+            {
+                return; 
+            }
             _currentFood = Utils.GetRayCastUI<FoodSlots>(Input.mousePosition); // check xem co nhan vao slot k
             if(_currentFood != null && _currentFood.HasFood)
             {
@@ -43,7 +44,7 @@ public class DropDragCtrl : MonoBehaviour
 
                 //tinh offset
                 Vector3 mouseWordPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                _offset = mouseWordPos - _currentFood.transform.position;
+                //_offset = mouseWordPos - _currentFood.transform.position;
 
                 _imgFoodDrag.transform.DOScale(Vector3.one * 1.3f, 0.2f);
 
@@ -54,7 +55,7 @@ public class DropDragCtrl : MonoBehaviour
         {
             _countTime =0;
             Vector3 mouseWordPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector3 foodPos = mouseWordPos + _offset;
+            Vector3 foodPos = mouseWordPos; //+ _offset;
             foodPos.z = 0f;
             _imgFoodDrag.transform.position = foodPos;
 
