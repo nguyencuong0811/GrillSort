@@ -9,10 +9,11 @@ public class GameTimer : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _timerTxt;
     private float _timeRemaining;
     private bool _isRunning;
+    private bool _isPaused;
 
     void Update()
     {
-        if(!_isRunning) return;
+        if (!_isRunning || _isPaused) return;
 
         _timeRemaining -= Time.deltaTime;
         
@@ -30,9 +31,22 @@ public class GameTimer : MonoBehaviour
     public void StartTimer(float seconds)
     {
         _isRunning = true;
+        _isPaused = false;
         _timeRemaining = seconds;
         
         UpdateUI();
+    }
+
+    public void PauseTimer()
+    {
+        if (!_isRunning) return;
+        _isPaused = true;
+    }
+
+    public void ResumeTimer()
+    {
+        if (!_isRunning) return;
+        _isPaused = false;
     }
 
     public void UpdateUI()

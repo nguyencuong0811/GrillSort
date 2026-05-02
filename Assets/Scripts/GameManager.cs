@@ -7,6 +7,7 @@ using TMPro;
 using UnityEngine.UI;
 using DG.Tweening;
 
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
@@ -33,6 +34,12 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private List<Image> _magnetLists = new();
     [SerializeField] private Transform _magnetFx;
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip _bgAudioInGame;
+    [SerializeField] private AudioClip _bgAudioInMenu;
+    [SerializeField] private AudioClip _sfxCollect;
+    [SerializeField] private AudioClip _OpenGrill;
     
     void Awake()
     {
@@ -53,11 +60,12 @@ public class GameManager : MonoBehaviour
     }
     void Start()
     {
-        LoadLevel();
+        //LoadLevel();
     }
     
     public void LoadLevel()
     {
+        AudioManager.Instance.PlayMusic(_bgAudioInGame);
         PopupManager.Instance.HideAll();
         int levelIndex = SaveManager.GetCurrentLevel();
         if(levelIndex >= levelDatabase.Levels.Count)
@@ -69,6 +77,16 @@ public class GameManager : MonoBehaviour
         InitLevel(_currentLevel);
 
         _gameTimer.StartTimer(_currentLevel.TimeLimit);
+    }
+
+    public void PauseGameplay()
+    {
+        _gameTimer?.PauseTimer();
+    }
+
+    public void ResumeGameplay()
+    {
+        _gameTimer?.ResumeTimer();
     }
     private void InitLevel(LevelData levelData)
     {
@@ -86,8 +104,13 @@ public class GameManager : MonoBehaviour
 
         CheckAndInit();
         //OnInitLevel();
-
         this.SetActiveLidGrill();
+
+        foreach(var grill in _listGrills)
+        {
+            grill.transform.localScale = Vector3.zero;
+            grill.transform.DOScale(1, 0.5f).SetEase(Ease.OutBack);
+        }
     }
     private void CheckAndInit()
     {
@@ -96,9 +119,10 @@ public class GameManager : MonoBehaviour
         {
             needReset = false;
             testInitCount++;
-            //Debug.Log("Tao lai: "+ testInitCount +" lan");
+            Debug.Log("Tao lai: "+ testInitCount +" lan");
             RemoveAllFood();
             OnInitLevel();
+            int grillFull = 0;
             foreach(var grill in _listGrills)
             {
                 if(grill.CheckMerge() == true)
@@ -106,9 +130,11 @@ public class GameManager : MonoBehaviour
                     needReset = true;
                     break;
                 }
+                if(grill.CheckFullSlot()) grillFull++;
                 
             }
-        }while(needReset);
+            if(grillFull == _totalGrill) needReset = true;
+        }while(needReset && testInitCount < 100);
 
         testInitCount = 0;
     }
@@ -202,6 +228,7 @@ public class GameManager : MonoBehaviour
     }
     public void OnMinusFood()
     {
+        AudioManager.Instance.PlaySFX(_sfxCollect);
         --_allFood;
         if(_allFood <= 0)
         {   
@@ -216,7 +243,8 @@ public class GameManager : MonoBehaviour
             IEnumerator WaitComplete()
             {
                 yield return new WaitForSeconds(1f);
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                LoadLevel();
             }
             Debug.Log("Lv hien tai "+ nextLevel);
         }
@@ -278,6 +306,7 @@ public class GameManager : MonoBehaviour
             if (grill.HasLidWithFood(completedFood))
             {
                 grill.ShowGrill();
+                AudioManager.Instance.PlaySFX(_OpenGrill);
                 _randLidGrill.RemoveAt(i);
                 break;
             }
@@ -451,7 +480,6 @@ public class GameManager : MonoBehaviour
                     OnMinusFood();
                     break;
                 }
-                
             }
             yield return new WaitForSeconds(0.8f);
             _isBoosterRuning = false;
@@ -486,6 +514,12 @@ public class GameManager : MonoBehaviour
             
         }
 
+        if (foods.Count == 0)
+        {
+            _isBoosterRuning = false;
+            return;
+        }
+
         Sequence seq = DOTween.Sequence();
 
         foreach(var item in foods)
@@ -504,10 +538,25 @@ public class GameManager : MonoBehaviour
         });
         foreach(var item in foods)
         {
-            seq.Join(item.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack).OnComplete(() =>
+            seq.Join(item.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack));
+        }
+        seq.OnComplete(() =>
+        {
+            _isBoosterRuning = false;
+        });
+    }
+    public void OnAddGrill()
+    {
+        foreach(var grill in _listGrills)
+        {
+            if (!grill.gameObject.activeInHierarchy)
             {
-                _isBoosterRuning = false;
-            }));
+                grill.HideTray();
+                grill.gameObject.SetActive(true);
+                grill.transform.localScale = Vector3.zero;
+                grill.transform.DOScale(1, 0.5f).SetEase(Ease.OutBack);
+                return;
+            }
         }
     }
 

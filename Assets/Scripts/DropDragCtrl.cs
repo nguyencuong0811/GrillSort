@@ -9,6 +9,7 @@ public class DropDragCtrl : MonoBehaviour
 {
     [SerializeField] private Image _imgFoodDrag;
     [SerializeField] private float _timeCheckSuggest;
+    [SerializeField] private AudioClip _sfxClick;
 
     private FoodSlots _currentFood, _cacheFood;
     private bool _hasDrag;
@@ -34,6 +35,7 @@ public class DropDragCtrl : MonoBehaviour
             _currentFood = Utils.GetRayCastUI<FoodSlots>(Input.mousePosition); // check xem co nhan vao slot k
             if(_currentFood != null && _currentFood.HasFood)
             {
+                AudioManager.Instance.PlaySFX(_sfxClick);
                 _hasDrag = true;
                 _cacheFood = _currentFood;
                 //gan sprite cho dummyfood
@@ -82,9 +84,6 @@ public class DropDragCtrl : MonoBehaviour
                         {
                             _cacheFood.OnHideFood();
                         }
-                        // _cacheFood = slotAvalable;
-                        // _cacheFood.OnFadeFood();
-                        // _cacheFood.OnSetFood(_currentFood.GetSpriteFood);
                         _cacheFood = null;
                     }
                     else
@@ -110,6 +109,7 @@ public class DropDragCtrl : MonoBehaviour
         }
         if(Input.GetMouseButtonUp(0) && _hasDrag)
         {
+            AudioManager.Instance.PlaySFX(_sfxClick);
             if(_cacheFood != null)
             {
                 _imgFoodDrag.transform.DOMove(_cacheFood.transform.position, 0.2f).OnComplete(() =>

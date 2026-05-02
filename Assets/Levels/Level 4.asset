@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec806b2e82981594db6becafca5ccfb2, type: 3}
   m_Name: Level 4
   m_EditorClassIdentifier: 
-  _levelIndex: 2
+  _levelIndex: 4
   _allFood: 20
   _totalFoods: 10
   _totalGrill: 9

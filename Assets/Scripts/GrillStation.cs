@@ -190,7 +190,7 @@ public class GrillStation : MonoBehaviour
         string name = _totalSlots[0].GetSpriteFood.name;
         for (int i = 0;i < _totalSlots.Count; i++)
         {
-            if(_totalSlots[i].GetSpriteFood.name != name)
+            if(_totalSlots[i].GetSpriteFood.name != name || !_totalSlots[i].gameObject.activeInHierarchy)
                 return false;
         }
         return true;
@@ -275,19 +275,28 @@ public class GrillStation : MonoBehaviour
     }
     public bool CheckMerge()
     {
-        if(CanMerge() == true) return true;
+        if(CanMerge() == true)
+            return true;
 
-        foreach(var tray in _totalTrays)
+        foreach (var tray in _totalTrays)
         {
-            if(!tray.gameObject.activeInHierarchy) continue;
-            if(tray.FoodList.Count < 3) continue;
+            if (!tray.gameObject.activeInHierarchy) 
+                continue;
 
-            string name = tray.FoodList[0].sprite.name;
-            
-            if(tray.FoodList.All(f => f.sprite.name == name))
+            // Chỉ lấy food thật sự đang hiện trên khay
+            List<Image> activeFoods = tray.FoodList
+                .Where(f => f.gameObject.activeInHierarchy && f.sprite != null)
+                .ToList();
+
+            // Rule gameplay: phải đúng 3 món
+            if (activeFoods.Count != 3)
+                continue;
+
+            string name = activeFoods[0].sprite.name;
+            if (activeFoods.All(f => f.sprite.name == name))
                 return true;
         }
- 
+
         return false;
     }
     public void CheckTray()
@@ -332,5 +341,22 @@ public class GrillStation : MonoBehaviour
     {
         RebuildStackTrays();
         CheckTray();
+    }
+    public void HideTray()
+    {
+        foreach(var tray in _totalTrays)
+        {
+            tray.gameObject.SetActive(false);
+        }
+    }
+
+    public bool CheckFullSlot()
+    {
+        foreach(var slot in _totalSlots)
+        {
+            if(!slot.HasFood)
+                return false;
+        }
+        return true;
     }
 }
