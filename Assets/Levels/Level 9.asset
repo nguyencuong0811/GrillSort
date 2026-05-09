@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec806b2e82981594db6becafca5ccfb2, type: 3}
   m_Name: Level 9
   m_EditorClassIdentifier: 
-  _levelIndex: 6
-  _allFood: 10
-  _totalFoods: 6
-  _totalGrill: 6
+  _levelIndex: 9
+  _allFood: 20
+  _totalFoods: 10
+  _totalGrill: 9
+  _totalLidGrill: 2
   _minAvgTray: 1.5
   _maxAvgTray: 2
+  _timeLimit: 0

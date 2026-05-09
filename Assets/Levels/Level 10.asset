@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: Level 10
   m_EditorClassIdentifier: 
   _levelIndex: 5
-  _allFood: 12
-  _totalFoods: 5
-  _totalGrill: 4
-  _minAvgTray: 1.5
+  _allFood: 20
+  _totalFoods: 10
+  _totalGrill: 9
+  _totalLidGrill: 2
+  _minAvgTray: 2
   _maxAvgTray: 2
+  _timeLimit: 0

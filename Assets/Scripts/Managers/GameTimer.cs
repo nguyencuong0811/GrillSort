@@ -11,6 +11,9 @@ public class GameTimer : MonoBehaviour
     private bool _isRunning;
     private bool _isPaused;
 
+
+    public bool IsLoss => _timeRemaining == 0 ? true : false;
+
     void Update()
     {
         if (!_isRunning || _isPaused) return;
@@ -19,6 +22,7 @@ public class GameTimer : MonoBehaviour
         
         if(_timeRemaining <= 0)
         {
+            PopupManager.Instance.ShowLoss();
             _timeRemaining = 0;
             _isRunning = false;
             UpdateUI();
@@ -27,7 +31,6 @@ public class GameTimer : MonoBehaviour
         }
         UpdateUI();
     }
-
     public void StartTimer(float seconds)
     {
         _isRunning = true;
@@ -54,12 +57,12 @@ public class GameTimer : MonoBehaviour
         int minutes = Mathf.FloorToInt(_timeRemaining / 60);
         int seconds = Mathf.FloorToInt(_timeRemaining % 60);
 
-
         _timerTxt.text = minutes.ToString() + ": " + seconds.ToString();
     }
 
     public void AddBonusTime()
     {
+        if(!BoosterSystem.UseBooster(BoosterType.Timer)) return;
         _timeRemaining += 120f;
     }
 }

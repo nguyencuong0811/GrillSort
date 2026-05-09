@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
     {
         _gameTimer = GetComponent<GameTimer>();
         _listGrills = Utils.GetListInChild<GrillStation>(_gridGrill);
-        Sprite[] sprites = Resources.LoadAll<Sprite>("items");
+        Sprite[] sprites = Resources.LoadAll<Sprite>("itemstest");
         _totalSpriteFood = sprites.ToList();
         if(Instance == null)
         {
@@ -98,7 +98,7 @@ public class GameManager : MonoBehaviour
 
         _avgTray = (Random.Range(levelData.MinAvgTray, levelData.MaxAvgTray));
 
-
+        Debug.Log("Level: "+ levelData.Level);
         // random bep bi an
         this.RandGrillHide();
 
@@ -120,6 +120,7 @@ public class GameManager : MonoBehaviour
             needReset = false;
             testInitCount++;
             Debug.Log("Tao lai: "+ testInitCount +" lan");
+            
             RemoveAllFood();
             OnInitLevel();
             int grillFull = 0;
@@ -177,10 +178,14 @@ public class GameManager : MonoBehaviour
             (useFood[i], useFood[rand]) = (useFood[rand], useFood[i]); // ham spawp
         }
 
-        int totalTray = Mathf.RoundToInt(useFood.Count / _avgTray); // tinh tong so luong dia can
+        int totalTray = 0;
+
+        totalTray = Mathf.CeilToInt((float)useFood.Count / _avgTray); // tinh tong so luong dia can
+
 
         List<int> trayPerGrill = this.DistributeEveLyn(_totalGrill, totalTray);
         List<int> foodPerGrill = this.DistributeEveLyn(_totalGrill, useFood.Count);
+
 
         for(int i=0; i< _listGrills.Count; i++)
         {
@@ -377,6 +382,8 @@ public class GameManager : MonoBehaviour
     {
         if(_isBoosterRuning) return;
 
+        if(!BoosterSystem.UseBooster(BoosterType.Magnet)) return;
+
         Dictionary<string, List<Image>> foods = new Dictionary<string, List<Image>>();
         foreach(var grill in _listGrills)
         {
@@ -492,6 +499,8 @@ public class GameManager : MonoBehaviour
     {
         if(_isBoosterRuning) return;
 
+        if(!BoosterSystem.UseBooster(BoosterType.Swap)) return;
+
         _isBoosterRuning = true;
 
         List<Image> foods = new();
@@ -547,6 +556,10 @@ public class GameManager : MonoBehaviour
     }
     public void OnAddGrill()
     {
+        if(!BoosterSystem.UseBooster(BoosterType.AddGrill)) return;
+
+        int grills = _listGrills.Count;
+
         foreach(var grill in _listGrills)
         {
             if (!grill.gameObject.activeInHierarchy)
@@ -557,9 +570,14 @@ public class GameManager : MonoBehaviour
                 grill.transform.DOScale(1, 0.5f).SetEase(Ease.OutBack);
                 return;
             }
+
+            grills--;
+        }
+        if(grills <= 0)
+        {
+            NotifyUI.Instance?.ShowNotify("Không còn bếp khả dụng!");
         }
     }
-
     public void BackToHome() => LoadingScene.Instance.BackToHome();
 
 }

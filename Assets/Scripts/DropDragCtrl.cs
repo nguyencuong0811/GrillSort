@@ -138,6 +138,7 @@ public class DropDragCtrl : MonoBehaviour
             StartCoroutine(TimeForClick());
         }
         
+        //test thoi
         if (Input.GetKeyDown(KeyCode.K))
         {
             Debug.Log("Press K");
@@ -148,6 +149,11 @@ public class DropDragCtrl : MonoBehaviour
         {
             Debug.Log("Press L");
             GameManager.Instance.RemoveAllFood();
+        }
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            Debug.Log("Press P");
+            SaveManager.ResetData();
         }
     }
     private void OnClearCacheSlot()

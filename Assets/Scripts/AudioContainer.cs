@@ -4,15 +4,10 @@ using UnityEngine;
 
 public class AudioContainer : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField] private AudioClip _bgAudioInGame;
+    [SerializeField] private AudioClip _bgAudioInMenu;
+    [SerializeField] private AudioClip _sfxClick;
+    [SerializeField] private AudioClip _sfxCollect;
+    [SerializeField] private AudioClip _OpenGrill;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }
