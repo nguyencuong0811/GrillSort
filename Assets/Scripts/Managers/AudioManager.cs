@@ -9,6 +9,8 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioSource _musicSource;
     [SerializeField] private AudioSource _sfxSource;
 
+    [SerializeField] private AudioClip _buyClick;
+
 
     [SerializeField] private AudioMixer _mixer;
 
@@ -39,7 +41,7 @@ public class AudioManager : MonoBehaviour
 
     public void StartMusic()
     {
-        _musicSource.Stop();
+        _musicSource.Play();
     }
 
     public void FadeInMusic(AudioClip clip, float duration = 1f)
@@ -123,4 +125,8 @@ public class AudioManager : MonoBehaviour
         _sfxSource.mute = isMute;
     }
 
+    public void PlayBuyClick()
+    {
+        PlaySFX(_buyClick);
+    }
 }

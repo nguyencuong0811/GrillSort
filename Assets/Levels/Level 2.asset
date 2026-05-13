@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec806b2e82981594db6becafca5ccfb2, type: 3}
   m_Name: Level 2
   m_EditorClassIdentifier: 
-  _levelIndex: 1
-  _allFood: 4
-  _totalFoods: 2
+  _levelIndex: 2
+  _allFood: 5
+  _totalFoods: 3
   _totalGrill: 3
   _totalLidGrill: 0
   _minAvgTray: 1.5
-  _maxAvgTray: 2
+  _maxAvgTray: 1.5
   _timeLimit: 300

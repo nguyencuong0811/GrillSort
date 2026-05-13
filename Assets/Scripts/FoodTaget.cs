@@ -32,7 +32,11 @@ public class FoodTaget : MonoBehaviour
         _imgNote.DOFade(0f, 1.5f).OnComplete(() =>
         {
             this.SetActive(false);
+            _imgNote.DOFade(1, 0);
         });
-        _imgFoodTarget.DOFade(0f, 1.5f);
+        _imgFoodTarget.DOFade(0f, 1.5f).OnComplete(() =>
+        {
+            _imgFoodTarget.DOFade(1, 0);
+        });
     }
 }

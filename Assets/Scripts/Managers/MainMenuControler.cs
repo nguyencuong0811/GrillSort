@@ -9,8 +9,17 @@ public class MainMenuControler : MonoBehaviour
     [SerializeField] private CanvasGroup gameCanvasGroup;
     [SerializeField] private float duration = 0.8f;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip _bgAudioInGame;
+    [SerializeField] private AudioClip _bgAudioInMenu;
+
+    void Start()
+    {
+        AudioManager.Instance?.PlayMusic(_bgAudioInMenu);
+    }
     public void ShowGame()
     {
+        AudioManager.Instance?.PlayMusic(_bgAudioInGame);
         PopupManager.Instance?.HideAll();
         GameManager.Instance?.ResumeGameplay();
 
@@ -35,6 +44,7 @@ public class MainMenuControler : MonoBehaviour
     }
     public void ShowMenu()
     {
+        AudioManager.Instance?.PlayMusic(_bgAudioInMenu);
         PopupManager.Instance?.HideAll();
 
         gameCanvasGroup.DOKill();

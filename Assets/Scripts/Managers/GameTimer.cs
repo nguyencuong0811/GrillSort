@@ -10,7 +10,7 @@ public class GameTimer : MonoBehaviour
     private float _timeRemaining;
     private bool _isRunning;
     private bool _isPaused;
-
+    public AudioClip _boosterTimer;
 
     public bool IsLoss => _timeRemaining == 0 ? true : false;
 
@@ -63,6 +63,7 @@ public class GameTimer : MonoBehaviour
     public void AddBonusTime()
     {
         if(!BoosterSystem.UseBooster(BoosterType.Timer)) return;
+        AudioManager.Instance?.PlaySFX(_boosterTimer);
         _timeRemaining += 120f;
     }
 }

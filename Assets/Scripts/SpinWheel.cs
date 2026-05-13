@@ -8,21 +8,20 @@ public class SpinWheel : MonoBehaviour
 {
     [Header("Wheel")]
     public RectTransform wheel;
-    public Button spinButton;
 
     [Header("Reward")]
     public int[] rewards = { 1, 2, 3, 4, 5, 6, 7, 8};
 
-    //private bool isSpinning;
+    public AudioClip spin;
 
-    //private const string LAST_SPIN_DATE = "LAST_SPIN_DATE";
-
+    private bool isSpinning = false;
 
     public void OnSpin()
     {
+        if(isSpinning) return;
         // Random ô thưởng
         int rewardIndex = UnityEngine.Random.Range(0, rewards.Length);
-
+        isSpinning = true;
         // Góc mỗi ô
         float anglePerItem = 360f / rewards.Length;
 
@@ -31,12 +30,16 @@ public class SpinWheel : MonoBehaviour
             360 * 5 + // quay nhiều vòng cho đẹp
             (rewardIndex * anglePerItem);
 
+        AudioManager.Instance?.PlaySFX(spin);
         wheel
             .DORotate(new Vector3(0, 0, -targetAngle), 5f, RotateMode.FastBeyond360)
             .SetEase(Ease.OutQuart)
             .OnComplete(() =>
             {
+                CoinEffect.Instance.PlayEffect(transform.position, 1);
+                BoosterSystem.Gold += rewards[rewardIndex];
                 Debug.Log("Nhận được: " + rewards[rewardIndex] + " vàng");
+                isSpinning =false;
             });
     }
 }

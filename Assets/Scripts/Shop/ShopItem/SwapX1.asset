@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3a1f637dd2293c4993c740a609b33c3, type: 3}
   m_Name: SwapX1
   m_EditorClassIdentifier: 
-  price: 150
+  price: 100
   boosterRewards:
   - type: 1
     icon: {fileID: 21300000, guid: 641058f9848164e40ba41ef03fa19493, type: 2}

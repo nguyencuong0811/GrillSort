@@ -2,34 +2,19 @@ using System.Collections;
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class LoadingScene : MonoBehaviour
 {
-    public static LoadingScene Instance;
     public CanvasGroup pnlLoading;
 
-    void Awake()
+    void Start()
     {
-        if(Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(this.gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        DontDestroyOnLoad(this.gameObject);
+        StartCoroutine(LoadAsyncScene());
     }
 
-    public void GoToGame()
-    {
-        StartCoroutine(LoadAsyncScene("Main"));
-    }
-    public void BackToHome()
-    {
-        StartCoroutine(LoadAsyncScene("Home"));
-    }
-    IEnumerator LoadAsyncScene(string nameScene)
+    IEnumerator LoadAsyncScene()
     {
         pnlLoading.gameObject.SetActive(true);
         pnlLoading.alpha = 0f;
@@ -37,7 +22,7 @@ public class LoadingScene : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(nameScene);
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Main");
 
         asyncLoad.allowSceneActivation = false;
 

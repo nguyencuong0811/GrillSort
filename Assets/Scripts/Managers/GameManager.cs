@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LevelDatabase levelDatabase;
     private LevelData _currentLevel;
     [SerializeField]private TextMeshProUGUI _leveltxt;
+    [SerializeField]private TextMeshProUGUI _leveltxt2;
 
     [SerializeField] private int _allFood; // tong so thuc an
     [SerializeField] private int _totalFoods; //tong so loai thuc an
@@ -36,10 +37,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform _magnetFx;
 
     [Header("Audio")]
-    [SerializeField] private AudioClip _bgAudioInGame;
-    [SerializeField] private AudioClip _bgAudioInMenu;
     [SerializeField] private AudioClip _sfxCollect;
     [SerializeField] private AudioClip _OpenGrill;
+    [SerializeField] private AudioClip _boosterMagnet;
+    [SerializeField] private AudioClip _boosterSwap;
+    [SerializeField] private AudioClip _boosterAddGrill;
+
     
     void Awake()
     {
@@ -60,12 +63,11 @@ public class GameManager : MonoBehaviour
     }
     void Start()
     {
-        //LoadLevel();
+        LoadLevel();
     }
     
     public void LoadLevel()
     {
-        AudioManager.Instance.PlayMusic(_bgAudioInGame);
         PopupManager.Instance.HideAll();
         int levelIndex = SaveManager.GetCurrentLevel();
         if(levelIndex >= levelDatabase.Levels.Count)
@@ -73,6 +75,7 @@ public class GameManager : MonoBehaviour
         
         _currentLevel = levelDatabase.Levels[levelIndex];
         _leveltxt.text = $"Level: {_currentLevel.Level+1}";
+        _leveltxt2.text = $"Level: {_currentLevel.Level+1}";
 
         InitLevel(_currentLevel);
 
@@ -247,7 +250,9 @@ public class GameManager : MonoBehaviour
 
             IEnumerator WaitComplete()
             {
-                yield return new WaitForSeconds(1f);
+                CoinEffect.Instance?.PlayEffect(transform.position, 2);
+                BoosterSystem.Gold+=100;
+                yield return new WaitForSeconds(1.5f);
                 //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
                 LoadLevel();
             }
@@ -295,7 +300,10 @@ public class GameManager : MonoBehaviour
 
     public void SetActiveLidGrill()
     {
+
         List<string> foodTarget = this.GetFoodWithMinCount(3);
+
+        Debug.Log("So food co the set la: "+ foodTarget.Count);
         for(int i = 0; i < _totalLidGrill; i++)
         {
             _listGrills[_randLidGrill[i]].HideGrillWithLid(foodTarget[0]);
@@ -424,6 +432,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        AudioManager.Instance?.PlaySFX(_boosterMagnet);
         StartCoroutine(IECollect());
 
         IEnumerator IECollect()
@@ -528,6 +537,7 @@ public class GameManager : MonoBehaviour
             _isBoosterRuning = false;
             return;
         }
+        AudioManager.Instance?.PlaySFX(_boosterSwap);
 
         Sequence seq = DOTween.Sequence();
 
@@ -556,28 +566,32 @@ public class GameManager : MonoBehaviour
     }
     public void OnAddGrill()
     {
-        if(!BoosterSystem.UseBooster(BoosterType.AddGrill)) return;
-
-        int grills = _listGrills.Count;
+        GrillStation targetGrill = null;
 
         foreach(var grill in _listGrills)
         {
             if (!grill.gameObject.activeInHierarchy)
             {
-                grill.HideTray();
-                grill.gameObject.SetActive(true);
-                grill.transform.localScale = Vector3.zero;
-                grill.transform.DOScale(1, 0.5f).SetEase(Ease.OutBack);
-                return;
+                targetGrill = grill;
+                break;
             }
-
-            grills--;
         }
-        if(grills <= 0)
+
+        if(targetGrill == null)
         {
             NotifyUI.Instance?.ShowNotify("Không còn bếp khả dụng!");
+            return;
         }
+
+        if(!BoosterSystem.UseBooster(BoosterType.AddGrill))
+            return;
+
+        AudioManager.Instance?.PlaySFX(_boosterAddGrill);
+
+        targetGrill.HideTray();
+        targetGrill.gameObject.SetActive(true);
+        targetGrill.transform.localScale = Vector3.zero;
+        targetGrill.transform.DOScale(1, 0.5f).SetEase(Ease.OutBack);
     }
-    public void BackToHome() => LoadingScene.Instance.BackToHome();
 
 }

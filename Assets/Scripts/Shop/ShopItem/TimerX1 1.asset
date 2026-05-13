@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3a1f637dd2293c4993c740a609b33c3, type: 3}
   m_Name: TimerX1 1
   m_EditorClassIdentifier: 
-  price: 0
+  price: 1000
   boosterRewards:
   - type: 2
     icon: {fileID: 21300000, guid: d4b2d44892c67684fa37d43c0e4e7def, type: 2}

@@ -13,7 +13,7 @@ public class ShopItemUI : MonoBehaviour
     private Image[] rewardIcons;
 
     [SerializeField]
-    private TMP_Text[] rewardAmounts;
+    private TMP_Text rewardAmounts;
 
     [Header("Price")]
     [SerializeField]
@@ -34,9 +34,7 @@ public class ShopItemUI : MonoBehaviour
         buyButton.onClick.AddListener(Buy);
     }
 
-    //==================================================
     // SETUP
-    //==================================================
 
     private void Setup()
     {
@@ -46,7 +44,7 @@ public class ShopItemUI : MonoBehaviour
         {
             rewardIcons[i].gameObject.SetActive(false);
 
-            rewardAmounts[i].gameObject.SetActive(false);
+            rewardAmounts.gameObject.SetActive(false);
         }
 
         for (int i = 0;
@@ -55,19 +53,17 @@ public class ShopItemUI : MonoBehaviour
         {
             rewardIcons[i].gameObject.SetActive(true);
 
-            rewardAmounts[i].gameObject.SetActive(true);
+            rewardAmounts.gameObject.SetActive(true);
 
             rewardIcons[i].sprite =
                 itemData.boosterRewards[i].icon;
 
-            rewardAmounts[i].text =
+            rewardAmounts.text =
                 "x" + itemData.boosterRewards[i].amount;
         }
     }
 
-    //==================================================
     // BUY
-    //==================================================
 
     public void Buy()
     {
@@ -76,7 +72,8 @@ public class ShopItemUI : MonoBehaviour
 
         if (!success)
             return;
-
+        
+        AudioManager.Instance?.PlayBuyClick();
         Debug.Log("Buy Success");
     }
 }

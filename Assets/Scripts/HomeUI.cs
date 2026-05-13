@@ -6,7 +6,8 @@ using TMPro;
 public class HomeUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _cointxt;
-    public void GoToGame() => LoadingScene.Instance.GoToGame();
+    [SerializeField] private TextMeshProUGUI _cointxt2;
+
 
     void Start()
     {
@@ -17,5 +18,6 @@ public class HomeUI : MonoBehaviour
     public void UpdateUI()
     {
         _cointxt.text = BoosterSystem.Gold.ToString();
+        _cointxt2.text = BoosterSystem.Gold.ToString();
     }
 }

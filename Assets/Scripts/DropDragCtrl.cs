@@ -167,7 +167,7 @@ public class DropDragCtrl : MonoBehaviour
     IEnumerator TimeForClick()
     {
         _canClick = false;
-        yield return new WaitForSeconds(0.21f);
+        yield return new WaitForSeconds(0.4f);
         _canClick = true;
     }
 
